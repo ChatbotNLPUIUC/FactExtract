@@ -120,11 +120,13 @@ Each being of 10,000 documents per update and repeated:
 '''
 
 # LDA mono-core -- fallback code in case LdaMulticore throws an error on your machine
-lda_model = gensim.models.LdaModel(bow_corpus, 
-                                    num_topics = 10, 
-                                    id2word = dictionary,                                    
-                                    passes = 50)
+#lda_model = gensim.models.LdaModel(bow_corpus, 
+                                    #num_topics = 10, 
+                                    #id2word = dictionary,                                    
+                                    #passes = 50)
+#lda_model.save("model")
 
+lda_model = gensim.models.LdaModel.load("model")
 # LDA multicore 
 '''
 Train your lda model using gensim.models.LdaMulticore and save it to 'lda_model'

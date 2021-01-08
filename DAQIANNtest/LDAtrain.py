@@ -12,12 +12,9 @@ import nltk
 nltk.download('wordnet')
 import pandas as pd
 stemmer = SnowballStemmer("english")
+import os.path
+from os import path
 
-
-newsgroups_train = fetch_20newsgroups(subset='train', shuffle = True)
-newsgroups_test = fetch_20newsgroups(subset='test', shuffle = True)
-
-#print(list(newsgroups_train.target_names))
 
 '''
 
@@ -45,17 +42,6 @@ def preprocess(text):
             
     return result
 
-processed_docs = []
-
-for doc in newsgroups_train.data:
-    processed_docs.append(preprocess(doc))
-
-'''
-Create a dictionary from 'processed_docs' containing the number of times a word appears 
-in the training set using gensim.corpora.Dictionary and call it 'dictionary'
-'''
-dictionary = gensim.corpora.Dictionary(processed_docs)
-
 '''
 OPTIONAL STEP
 Remove very rare and very common words:
@@ -64,15 +50,6 @@ Remove very rare and very common words:
 - words appearing in more than 10% of all documents
 '''
 #dictionary.filter_extremes(no_below=15, no_above=0.1, keep_n= 100000)
-
-'''
-Gensim: doc2bow
-
-Converts list of words into bag of words format (list of 2-tuples [token_id, token_count])
-'''
-
-bow_corpus = [dictionary.doc2bow(doc) for doc in processed_docs]
-
 
 #bow_doc_x = bow_corpus[20]
 
@@ -119,38 +96,70 @@ Each being of 10,000 documents per update and repeated:
 
 '''
 
-'''
-Split one to training and one to doing LDA
-'''
-# LDA mono-core -- fallback code in case LdaMulticore throws an error on your machine
-#lda_model = gensim.models.LdaModel(bow_corpus, 
-                                    #num_topics = 10, 
-                                    #id2word = dictionary,                                    
-                                    #passes = 50)
-#lda_model.save("model")
-
-lda_model = gensim.models.LdaModel.load("model")
 # LDA multicore 
+
 '''
-Train your lda model using gensim.models.LdaMulticore and save it to 'lda_model'
+Train your lda model using gensim.models.LdaMulticore and save it to lda_model
 '''
-# TODO
 #lda_model =  gensim.models.LdaMulticore(bow_corpus, 
                                    #num_topics = 8, 
                                    #id2word = dictionary,                                    
                                    #passes = 10,
                                    #workers = 2)
 
-'''
-Testing on unseen documents
-'''
-num = 100
-unseen_document = newsgroups_test.data[num]
-#print(unseen_document)
+def process(dataName):
+    #doc_train = dataName
+    processed_docs = []
 
-bow_vector = dictionary.doc2bow(preprocess(unseen_document))
+    for doc in dataName:
+        processed_docs.append(preprocess(doc))
+    
+    '''
+    Create a dictionary from 'processed_docs' containing the number of times a word appears 
+    in the training set using gensim.corpora.Dictionary and call it 'dictionary'
+    '''
+    dictionary = gensim.corpora.Dictionary(processed_docs)
+    return processed_docs, dictionary
 
-for index, score in sorted(lda_model[bow_vector], key=lambda tup: -1*tup[1]):
-    print("Score: {}\t Topic: {}".format(score, lda_model.print_topic(index, 5)))
+def train(processed, dictionary):
 
-print(newsgroups_test.target[num])
+    '''
+    Gensim: doc2bow
+
+    Converts list of words into bag of words format (list of 2-tuples [token_id, token_count])
+    '''
+    bow_corpus = [dictionary.doc2bow(doc) for doc in processed]
+
+    '''
+    Split one to training and one to doing LDA
+    '''
+    # LDA mono-core -- fallback code in case LdaMulticore throws an error on your machine
+    lda_model = gensim.models.LdaModel(bow_corpus, 
+                                        num_topics = 10, 
+                                        id2word = dictionary,                                    
+                                        passes = 50)
+    return lda_model
+
+if __name__ == "__main__":
+    train = fetch_20newsgroups(subset='train', shuffle = True)
+    test = fetch_20newsgroups(subset='test', shuffle = True)
+    processed, dictionary = process(train)
+
+    if not path.exists("model"):
+        train(processed, dictionary).save("model")
+    else:
+        lda_model = gensim.models.LdaModel.load("model")
+
+        '''
+        Testing on unseen documents
+        '''
+        num = 100
+        unseen_document = test.data[num]
+        #print(unseen_document)
+
+        bow_vector = dictionary.doc2bow(preprocess(unseen_document))
+
+        for index, score in sorted(lda_model[bow_vector], key=lambda tup: -1*tup[1]):
+            print("Score: {}\t Topic: {}".format(score, lda_model.print_topic(index, 5)))
+
+        print(test.target[num])

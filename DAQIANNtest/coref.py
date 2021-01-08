@@ -1,11 +1,15 @@
+# Download https://github.com/huggingface/neuralcoref from source
+# Using neuralcoref for coreference resolution
+# import neuralcoref
 import spacy
+nlp = spacy.load('en_core_web_lg')
+
+# Add neural coref to SpaCy's pipe
 import neuralcoref
-
-nlp = spacy.load('en_core_web_sm')
 neuralcoref.add_to_pipe(nlp)
-doc1 = nlp('My sister has a dog. She loves him.')
-print(doc1._.coref_clusters)
 
-doc2 = nlp('Angela lives in Boston. She is quite happy in that city.')
-for ent in doc2.ents:
-    print(ent._.coref_cluster)
+# You're done. You can now use NeuralCoref as you usually manipulate a SpaCy document annotations.
+doc = nlp(u'My sister has a dog. She loves him.')
+
+print(doc._.has_coref)
+print(doc._.coref_clusters)

@@ -10,6 +10,7 @@ neuralcoref.add_to_pipe(nlp)
 
 # You're done. You can now use NeuralCoref as you usually manipulate a SpaCy document annotations.
 doc = nlp(u'My sister has a dog. She loves him.')
-
-print(doc._.has_coref)
-print(doc._.coref_clusters)
+test = nlp("I voted for Obama because he was most aligned with my values")
+trial = nlp("She said")
+print(trial._.has_coref)
+print(trial._.coref_clusters)

@@ -15,7 +15,6 @@ stemmer = SnowballStemmer("english")
 import os.path
 from os import path
 
-
 '''
 
 Process:
@@ -143,6 +142,7 @@ def train(processed, dictionary):
 if __name__ == "__main__":
     train = fetch_20newsgroups(subset='train', shuffle = True)
     test = fetch_20newsgroups(subset='test', shuffle = True)
+    print(train)
     processed, dictionary = process(train)
 
     if not path.exists("model"):

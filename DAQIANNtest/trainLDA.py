@@ -2,6 +2,7 @@
 #https://towardsdatascience.com/nlp-extracting-the-main-topics-from-your-dataset-using-lda-in-minutes-21486f5aa925
 from sklearn.datasets import fetch_20newsgroups
 import gensim
+import sklearn
 from gensim.utils import simple_preprocess
 from gensim.parsing.preprocessing import STOPWORDS
 from nltk.stem import WordNetLemmatizer, SnowballStemmer
@@ -140,11 +141,20 @@ def train(processed, dictionary):
     return lda_model
 
 if __name__ == "__main__":
-    train = fetch_20newsgroups(subset='train', shuffle = True)
-    test = fetch_20newsgroups(subset='test', shuffle = True)
-    print(train)
-    processed, dictionary = process(train)
-
+    traindocs = fetch_20newsgroups(subset='train', shuffle = True)
+    testdocs = fetch_20newsgroups(subset='test', shuffle = True)
+    
+    for files in os.listdir("SepTrain"):
+        print(files)
+        f = open("SepTrain/"+files, "r")
+        np.append(traindocs.data,f.read())
+        np.append(traindocs.target,20)
+        np.append(traindocs.filenames,"SepTrain/"+files)
+        np.append(traindocs.DESCR,"")
+        np.append(traindocs.target_names,"textbook")
+        f.close()
+    
+    processed, dictionary = process(traindocs)
     if not path.exists("model"):
         train(processed, dictionary).save("model")
     else:
@@ -154,12 +164,11 @@ if __name__ == "__main__":
         Testing on unseen documents
         '''
         num = 100
-        unseen_document = test.data[num]
-        #print(unseen_document)
+        unseen_document = testdocs.data[num]
 
         bow_vector = dictionary.doc2bow(preprocess(unseen_document))
 
         for index, score in sorted(lda_model[bow_vector], key=lambda tup: -1*tup[1]):
             print("Score: {}\t Topic: {}".format(score, lda_model.print_topic(index, 5)))
 
-        print(test.target[num])
+        print(testdocs.target[num])

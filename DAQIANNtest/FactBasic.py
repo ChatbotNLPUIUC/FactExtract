@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import numpy as np
 import matplotlib.pyplot as plt
-from Rules import rule1
+from Rules import rule1, rule2, rule2_mod
 
 # load english language model
 nlp = spacy.load('en_core_web_sm',disable=['ner','textcat'])
@@ -253,39 +253,18 @@ for i in range(len(df_show)):
 df_sep = pd.DataFrame(dis_list)
 print(df_sep.head())
 
-'''
-RULE: Adjective Noun Structure
+# Create a df containing sentence and its output for rule 2
+row_list = []
 
-Look for tokens that have a Noun POS tag and have subject or object dependency
-
-Look at the child nodes of these tokens and append it to the phrase only if it modifies the noun
-'''
-
-# function for rule 2
-def rule2(text):
+for i in range(len(df2)):
     
-    doc = nlp(text)
+    sent = df2.loc[i,'Sent']
+    year = df2.loc[i,'Year']
+    # Rule 2
+    output = rule2(sent)
+    if len(output) != 0:
+        dict1 = {'Year':year,'Sent':sent,'Output':output}
+        row_list.append(dict1)
 
-    pat = []
-    
-    # iterate over tokens
-    for token in doc:
-        phrase = ''
-        # if the word is a subject noun or an object noun
-        if (token.pos_ == 'NOUN')\
-            and (token.dep_ in ['dobj','pobj','nsubj','nsubjpass']):
-            
-            # iterate over the children nodes
-            for sub in token.children:
-                # if word is an adjective or has a compound dependency
-                if (sub.pos_ == 'ADJ') or (sub.dep_ == 'compound'):
-                    phrase += sub.text + ' '
-                    
-            if len(phrase) != 0:
-                phrase += token.text
-             
-        if len(phrase) != 0:
-            pat.append(phrase)
-        
-    
-    return pat
+df_rule2_show = pd.DataFrame(row_list)
+print(df_rule2_show.head())

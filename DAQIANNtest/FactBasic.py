@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import numpy as np
 import matplotlib.pyplot as plt
-from Rules import rule1, rule2, rule2_mod
+from Rules import rule1, rule2, rule2_mod, rule1_mod
 
 # load english language model
 nlp = spacy.load('en_core_web_sm',disable=['ner','textcat'])
@@ -253,6 +253,7 @@ for i in range(len(df_show)):
 df_sep = pd.DataFrame(dis_list)
 print(df_sep.head())
 
+'''
 # Create a df containing sentence and its output for rule 2
 row_list = []
 
@@ -268,3 +269,22 @@ for i in range(len(df2)):
 
 df_rule2_show = pd.DataFrame(row_list)
 print(df_rule2_show.head())
+'''
+
+# create a df containing sentence and its output for modified rule 1
+row_list = []
+
+# df2 contains all the sentences from all the speeches
+for i in range(len(df2)):
+    
+    sent = df2.loc[i,'Sent']
+    year = df2.loc[i,'Year']
+    output = rule1_mod(sent)
+    dict1 = {'Year':year,'Sent':sent,'Output':output}
+    row_list.append(dict1)
+    
+df_rule1_mod_all = pd.DataFrame(row_list)
+# check rule1 output on complete speeches
+output_per(df_rule1_mod_all,'Output')
+
+print(df_rule1_mod_all.head(20))

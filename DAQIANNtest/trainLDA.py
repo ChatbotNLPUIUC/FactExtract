@@ -143,7 +143,7 @@ def train(processed, dictionary):
 if __name__ == "__main__":
     traindocs = fetch_20newsgroups(subset='train', shuffle = True)
     testdocs = fetch_20newsgroups(subset='test', shuffle = True)
-    
+    count = 0
     for files in os.listdir("SepTrain"):
         print(files)
         f = open("SepTrain/"+files, "r")
@@ -153,19 +153,31 @@ if __name__ == "__main__":
         np.append(traindocs.DESCR,"")
         np.append(traindocs.target_names,"textbook")
         f.close()
+
+    for files in os.listdir("SepTest"):
+        print(files)
+        f = open("SepTest/"+files, "r")
+        np.append(testdocs.data,f.read())
+        np.append(testdocs.target,20)
+        np.append(testdocs.filenames,"SepTest/"+files)
+        np.append(testdocs.DESCR,"")
+        np.append(testdocs.target_names,"textbook")
+        f.close()
     
-    processed, dictionary = process(traindocs)
+    processed, dictionary = process(traindocs.data)
     if not path.exists("model"):
         train(processed, dictionary).save("model")
     else:
         lda_model = gensim.models.LdaModel.load("model")
+        for idx, topic in lda_model.print_topics(-1):
+            print("Topic: {} \nWords: {}".format(idx, topic ))
+            print("\n")
 
         '''
         Testing on unseen documents
         '''
         num = 100
         unseen_document = testdocs.data[num]
-
         bow_vector = dictionary.doc2bow(preprocess(unseen_document))
 
         for index, score in sorted(lda_model[bow_vector], key=lambda tup: -1*tup[1]):

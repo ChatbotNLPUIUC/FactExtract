@@ -129,7 +129,7 @@ Split one to training and one to doing LDA
                                     #passes = 50)
 #lda_model.save("model")
 
-lda_model = gensim.models.LdaModel.load("model")
+lda_model = gensim.models.LdaModel.load("LDAmodel")
 # LDA multicore 
 '''
 Train your lda model using gensim.models.LdaMulticore and save it to 'lda_model'

@@ -165,10 +165,10 @@ if __name__ == "__main__":
         f.close()
     
     processed, dictionary = process(traindocs.data)
-    if not path.exists("model"):
-        train(processed, dictionary).save("model")
+    if not path.exists("LDAmodel"):
+        train(processed, dictionary).save("LDAmodel")
     else:
-        lda_model = gensim.models.LdaModel.load("model")
+        lda_model = gensim.models.LdaModel.load("LDAmodel")
         for idx, topic in lda_model.print_topics(-1):
             print("Topic: {} \nWords: {}".format(idx, topic ))
             print("\n")

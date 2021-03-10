@@ -1,28 +1,33 @@
 # Download https://github.com/huggingface/neuralcoref from source
 # Using neuralcoref for coreference resolution
 # import neuralcoref
+from allennlp.predictors.predictor import Predictor
+import allennlp_models.tagging
+from nltk import ParentedTree
 import re
 import spacy
+import neuralcoref
+from extract_independent import filt_l, filt_r, extract_independent_clauses
+
 nlp = spacy.load('en_core_web_lg')
 
 # Add neural coref to SpaCy's pipe
-import neuralcoref
 neuralcoref.add_to_pipe(nlp)
 
-# You're done. You can now use NeuralCoref as you usually manipulate a SpaCy document annotations.
-doc = nlp("My sister has a dog. The girl loves him. She gives him pets. When he is sad, pets cheer him up.")
+predictor = Predictor.from_path("https://storage.googleapis.com/allennlp-public-models/elmo-constituency-parser-2020.02.10.tar.gz")
+
+doc = "My sister has a dog. The girl loves him. She gives him pets. When he is sad, pets cheer him up."
 test = nlp("I voted for Obama because he was most aligned with my values")
 trial = nlp("She said")
-#print(trial._.has_coref)
-#print(doc._.coref_clusters)
 
 def splitCoref(doc):
-    value = doc._.coref_clusters
+    value = nlp(doc)._.coref_clusters
     if not value:
         print("No coreference")
         return None
     
-    sents = str(doc.text).split('.') # Replace with finding clauses function
+    #sents = str(doc.text).split('.') # Replace with finding clauses function
+    sents = extract_independent_clauses(doc, predictor)
     res = ""
     index = 0
     for i in range(len(value)):
